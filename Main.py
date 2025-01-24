@@ -18,7 +18,7 @@ print("Width:", width)
 print("Height:", height)
 #Taking screenshot
 reader = easyocr.Reader(['en'])
-bounding_box = (0,height/7,width,height/4)
+bounding_box = (0,int(height/7),width,int(height/4))
 time.sleep(2)
 screenshot = ImageGrab.grab(bbox=bounding_box)
 screenshot.save("temp.png")
