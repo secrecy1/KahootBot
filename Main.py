@@ -29,31 +29,7 @@ for(bbox,text,prob) in result:
     s = s+text
 print(s, end=" ")
 print("\n")
-'''
-# Load image, ensure not palettised, and make into Numpy array
-pim = Image.open('img_1.png').convert('RGB')
-im  = np.array(pim)
 
-# Define the blue colour we want to find - PIL uses RGB ordering
-color = [255,255,255]
-
-# Get X and Y coordinates of all blue pixels
-#np.set_printoptions(threshold=np.inf)
-step = 1
-Y, X = np.where(np.all(im[::step, ::step] == color, axis=2))
-
-# Scale back coordinates to match original image
-Y = Y * step
-X = X * step
-
-
-print("colors")
-print("X: ",end="")
-print(X)
-print("-------------------------")
-print("Y: ",end="")
-print(Y)
-'''
 
 
 
@@ -77,43 +53,47 @@ completion = client.chat.completions.create(
 )
 response_text = completion.choices[0].message.content
 
-img = ImageGrab.grab(bbox=(0,int(height/2),width,height))
-img.save("FREE.png")
-print("AI response")
-print(response_text)
-# Convert the image to grayscale
-gray_img = img.convert("L")  # "L" mode converts to grayscale
+'''
+import tkinter as tk
+import os
+import numpy as np
+from PIL import ImageGrab
+from PIL import Image
+import time
+import tkinter as tk
+import easyocr
+img = Image.open("img_1.png")
+img = img.convert("RGB")
+img_array = np.array(img)
+#E21B3C
+red = [226, 27, 60]
+blue = [19, 104, 206]
+yellow =[199, 146, 0]
+green = [38, 137, 12]
+colors = [red,blue,yellow,green]
+clickCoordsX = []
+clickCoordsY = []
+options = []
+i = 0
+reader = easyocr.Reader(['en'],gpu=True)
+for color in colors:
+    # Get X and Y coordinates of all blue pixels
+    Y, X = np.where(np.all(img_array==color,axis=2))
+    print(X[0],Y[0])
+    print(X[len(X)-1],Y[len(Y)-1])
+    clickCoordsX.append(int((X[(len(X) - 1) // 2])))
+    clickCoordsY.append(int((Y[(len(Y) - 1) // 2])))
+    tempimg = img.crop((int(X[0]),int(Y[0]),int(X[len(X)-1]),int(Y[len(Y)-1])))
+    result = (reader.readtext(np.array(tempimg)))
+    s = ""
+    for (bbox, text, prob) in result:
+        s = s + text
+    options.append(s)
+print(options)
+print(clickCoordsX)
+print(clickCoordsY)
+'''
 
-# Convert the grayscale image to a NumPy array for fast processing
-gray_array = np.array(gray_img)
-
-# Define the target grayscale value (0-255)
-target_gray_value = 90  # Replace with your desired grayscale value
-
-# Find the pixel coordinates of the closest match
-difference = np.abs(gray_array - target_gray_value)
-min_diff = np.min(difference)
-coordinates = np.argwhere(difference == min_diff)
-#bounding_box = (0,height/7,width,height/4)
-
-#screenshot2 = ImageGrab.grab()
-#screenshot2.save("temp.png")
-# Print the results
-xMax = 0
-yMax = 0
-if len(coordinates) > 0:
-    print(f"Pixel(s) with closest match to {target_gray_value}:")
-    for coord in coordinates:
-        print(f"Row: {coord[0]}, Column: {coord[1]}")
-        xMax = max(coord[0],xMax)
-        yMax = max(coord[0], yMax)
-
-else:
-    print("No matching pixel found.")
-yMax = yMax + int(height / 2)
-bounding_box = [0,0,xMax,yMax]
-screenshot2 = ImageGrab.grab(bbox = bounding_box)
-screenshot2.save("tester.png")
 
 
 
